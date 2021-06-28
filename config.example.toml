@@ -1,0 +1,11 @@
+# Login credentials (not used yet).
+#Username = "you@example.com"
+#Password = "a.strong-passw0rd!"
+
+# Session cookie, used instead of login credentials. You need to manually
+# login to your Cloud instance (check "rememeber me" on the SSO login form)
+# and copy the "sid" cookie value here.
+SessionID = "<sid cookie>"
+
+# The URL of your Cloud instance.
+Instance = "https://<your-instance>.cloud.cambiumnetworks.com/"
