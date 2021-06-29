@@ -1,9 +1,7 @@
 package exporter
 
 import (
-	"bytes"
 	"fmt"
-	"io"
 	"net/http"
 	"net/http/cookiejar"
 	"net/url"
@@ -65,45 +63,4 @@ func (cfg *Config) getCsrfToken() string {
 	}
 
 	return ""
-}
-
-const userAgent = "Mozilla/5.0 (X11; Linux x86_64; rv:89.0) Gecko/20100101 Firefox/89.0"
-
-func (cfg *Config) FetchCSRFToken() {
-	var u2 url.URL
-	u2 = *cfg.instance // dup
-	u2.Path = "/0/cn-srv/user/me"
-
-	req, err := http.NewRequest(http.MethodGet, u2.String(), nil)
-	if err != nil {
-		panic(err)
-	}
-
-	// for _, c := range cfg.client.Jar.Cookies(cfg.instance) {
-	// 	fmt.Printf("add-cookie: %v\n", c)
-	// 	req.AddCookie(c)
-	// }
-
-	req.Header.Set("Accept", "application/json")
-	req.Header.Set("User-Agent", userAgent)
-	// bypass canonicalization
-	req.Header["x-cidx"] = []string{"0"}
-	if token := cfg.getCsrfToken(); token != "" {
-		req.Header["X-XSRF-TOKEN"] = []string{token}
-	}
-
-	fmt.Println("token:", cfg.getCsrfToken())
-	res, err := cfg.client.Do(req)
-	if err != nil {
-		panic(err)
-	}
-
-	defer res.Body.Close()
-	var buf bytes.Buffer
-	io.Copy(&buf, res.Body)
-
-	fmt.Println("response:", res.StatusCode, buf.String())
-	if token := cfg.getCsrfToken(); token != "" {
-		fmt.Println("token:", token)
-	}
 }
