@@ -10,7 +10,7 @@ import (
 	"github.com/pelletier/go-toml"
 )
 
-type Config struct {
+type Client struct {
 	Username  string // currently not used
 	Password  string // currently not used
 	SessionID string // used instead of username/password
@@ -21,9 +21,9 @@ type Config struct {
 	client   *http.Client
 }
 
-// LoadConfig loads the configuration from a file.
-func LoadConfig(file string) (*Config, error) {
-	cfg := Config{}
+// LoadClientConfig loads the configuration from a file and initializes
+// the client.
+func LoadClientConfig(file string) (*Client, error) {
 	f, err := os.Open(file)
 	if err != nil {
 		return nil, fmt.Errorf("failed to open config file %q: %w", file, err)
@@ -55,10 +55,10 @@ func LoadConfig(file string) (*Config, error) {
 	return &cfg, nil
 }
 
-func (cfg *Config) getCsrfToken() string {
-	for _, c := range cfg.client.Jar.Cookies(cfg.instance) {
-		if c.Name == "XSRF-TOKEN" {
-			return c.Value
+func (c *Client) getCsrfToken() string {
+	for _, cookie := range c.client.Jar.Cookies(c.instance) {
+		if cookie.Name == "XSRF-TOKEN" {
+			return cookie.Value
 		}
 	}
 

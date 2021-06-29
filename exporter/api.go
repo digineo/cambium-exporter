@@ -14,9 +14,9 @@ import (
 const userAgent = "Mozilla/5.0 (X11; Linux x86_64; rv:89.0) Gecko/20100101 Firefox/89.0"
 
 // newRequest creates a new HTTP request and prefills its header.
-func (cfg *Config) fetch(ctx context.Context, method, path string, params url.Values) (*http.Response, error) {
+func (c *Client) fetch(ctx context.Context, method, path string, params url.Values) (*http.Response, error) {
 	var u2 url.URL
-	u2 = *cfg.instance // dup
+	u2 = *c.instance // dup
 	u2.Path = "/0/cn-srv"
 	if len(path) > 0 && path[0] != '/' {
 		u2.Path += "/"
@@ -34,17 +34,17 @@ func (cfg *Config) fetch(ctx context.Context, method, path string, params url.Va
 
 	// bypass canonicalization
 	req.Header["x-cidx"] = []string{"0"}
-	if token := cfg.getCsrfToken(); token != "" {
+	if token := c.getCsrfToken(); token != "" {
 		req.Header["X-XSRF-TOKEN"] = []string{token}
 	}
 
-	return cfg.client.Do(req)
+	return c.client.Do(req)
 }
 
 // fetchCSRFToken is needed to get the initial CSRF cookie, needed for
 // most operations.
-func (cfg *Config) fetchCSRFToken(ctx context.Context) error {
-	res, err := cfg.fetch(ctx, http.MethodGet, "/user/me", nil)
+func (c *Client) fetchCSRFToken(ctx context.Context) error {
+	res, err := c.fetch(ctx, http.MethodGet, "/user/me", nil)
 	if err != nil {
 		return fmt.Errorf("failed to fetch CSRF token: %w", err)
 	}
@@ -54,14 +54,14 @@ func (cfg *Config) fetchCSRFToken(ctx context.Context) error {
 }
 
 // fetchAPGroups returns the list of WiFi AP group names.
-func (cfg *Config) fetchAPGroups(ctx context.Context) ([]string, error) {
-	if cfg.getCsrfToken() == "" {
-		if err := cfg.fetchCSRFToken(ctx); err != nil {
+func (c *Client) fetchAPGroups(ctx context.Context) ([]string, error) {
+	if c.getCsrfToken() == "" {
+		if err := c.fetchCSRFToken(ctx); err != nil {
 			return nil, err
 		}
 	}
 
-	res, err := cfg.fetch(ctx, http.MethodGet, "/config/profiles", url.Values{
+	res, err := c.fetch(ctx, http.MethodGet, "/config/profiles", url.Values{
 		"fields": {"name,hasDevices"},
 		"limit":  {"0"},
 	})
@@ -100,11 +100,11 @@ var fetchDevFields = []string{
 	"id", "rxAvg", "txAvg", "band", "radios.mac", "channel", "chWidth", "rfqlt", "pow",
 }
 
-func (cfg *Config) fetchDevices(ctx context.Context, apGroup string) ([]*Device, error) {
+func (c *Client) fetchDevices(ctx context.Context, apGroup string) ([]*Device, error) {
 	path := fmt.Sprintf("/stats/profiles/%s/devices", apGroup)
 	fields := fmt.Sprintf(strings.Join(fetchDevFields, ","), apGroup)
 
-	res, err := cfg.fetch(ctx, http.MethodGet, path, url.Values{
+	res, err := c.fetch(ctx, http.MethodGet, path, url.Values{
 		"all":      {"true"},
 		"fields":   {fields},
 		"limit":    {"0"},
@@ -135,9 +135,9 @@ func (cfg *Config) fetchDevices(ctx context.Context, apGroup string) ([]*Device,
 	return devs, nil
 }
 
-func (cfg *Config) fetchAPGroupData(ctx context.Context, apGroup string) (*APGroupAPIResponse, error) {
+func (c *Client) fetchAPGroupData(ctx context.Context, apGroup string) (*APGroupAPIResponse, error) {
 	fields := fmt.Sprintf("name,deviceCount,offlineCount,clientCount,clientCount24h,name:%s", apGroup)
-	res, err := cfg.fetch(ctx, http.MethodGet, "/config/profiles", url.Values{"fields": {fields}})
+	res, err := c.fetch(ctx, http.MethodGet, "/config/profiles", url.Values{"fields": {fields}})
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch devices for AP group %q: %w", apGroup, err)
 	}

@@ -48,12 +48,12 @@ func main() {
 		os.Exit(0)
 	}
 
-	cfg, err := exporter.LoadConfig(*configFile)
+	client, err := exporter.LoadClientConfig(*configFile)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
 
-	cfg.Start(*listenAddress, version)
+	client.Start(*listenAddress, version)
 }
 
 func printVersion() {
