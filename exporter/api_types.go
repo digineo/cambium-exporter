@@ -60,10 +60,13 @@ type Radio struct {
 
 func (radio radioResponse) Normalize() (r Radio) {
 	r = Radio{
-		Rx:      radio.RxAvg,
-		Tx:      radio.TxAvg,
-		Quality: radio.Quality,
-		Power:   radio.Power,
+		Band:         BandUnknown,
+		Channel:      -1,
+		ChannelWidth: -1,
+		Rx:           radio.RxAvg,
+		Tx:           radio.TxAvg,
+		Quality:      radio.Quality,
+		Power:        radio.Power,
 	}
 
 	switch radio.Band {
@@ -71,16 +74,13 @@ func (radio radioResponse) Normalize() (r Radio) {
 		r.Band = BandBGN
 	case "5GHz":
 		r.Band = BandAC
-	default:
-		r.Band = BandUnknown
 	}
 
-	var err error
-	if r.Channel, err = strconv.Atoi(radio.Channel); err != nil {
-		r.Channel = -1
+	if ch, err := strconv.Atoi(radio.Channel); err == nil {
+		r.Channel = ch
 	}
-	if r.ChannelWidth, err = strconv.Atoi(radio.ChannelWidth); err != nil {
-		r.ChannelWidth = -1
+	if chw, err := strconv.Atoi(radio.ChannelWidth); err == nil {
+		r.ChannelWidth = chw
 	}
 
 	return
