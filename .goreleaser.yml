@@ -1,0 +1,53 @@
+builds:
+  - main:   main.go
+    binary: cambium-exporter
+    flags:
+      - -trimpath
+    ldflags:
+      - -s -w
+      - -X main.version={{ .Version }}
+      - -X main.commit={{ .Commit }}
+      - -X main.date={{ .Date }}
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - windows
+    goarch:
+      - amd64
+    mod_timestamp: "{{ .CommitTimestamp }}"
+
+nfpms:
+  - package_name:       cambium-exporter
+    file_name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    vendor:             Digineo GmbH
+    homepage:           https://www.digineo.de/
+    maintainer:         Dominik Menke <dom@digineo.de>
+    description:        Prometheus Exporter for Cambium cnMaestro Cloud controller
+
+    formats:  [deb]
+    license:  MIT
+    bindir:   /usr/bin
+    section:  default
+    priority: extra
+
+    contents:
+      - src:  debian/cambium-exporter.service
+        dst:  /lib/systemd/system/cambium-exporter.service
+
+      - src:  debian/default
+        dst:  /etc/default/cambium-exporter
+        type: config
+
+      - src:  config.example.toml
+        dst:  /etc/cambium-exporter/config.toml
+        type: config
+        file_info:
+          mode:  0600
+          owner: cambium-exporter
+          group: cambium-exporter
+
+    scripts:
+      postinstall: debian/postinstall.sh
+      preremove:   debian/preremove.sh
+      postremove:  debian/postremove.sh

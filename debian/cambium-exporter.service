@@ -1,0 +1,14 @@
+[Unit]
+Description=Prometheus Exporter for Cambium cnMaestro Cloud controller
+Documentation=https://github.com/digineo/cambium-exporter
+
+[Service]
+EnvironmentFile=/etc/default/cambium-exporter
+ExecStart=/usr/bin/cambium-exporter --config=/etc/cambium-exporter/config.toml $ARGS
+User=cambium-exporter
+ProtectSystem=strict
+ProtectHome=yes
+ReadOnlyPaths=/etc/cambium-exporter
+
+[Install]
+WantedBy=multi-user.target
