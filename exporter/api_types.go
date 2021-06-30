@@ -89,8 +89,8 @@ func (radio radioResponse) Normalize() (r Radio) {
 type Band string
 
 const (
-	BandAC      = Band("5GHz")
-	BandBGN     = Band("2.4GHz")
+	BandAC      = Band("5")
+	BandBGN     = Band("2.4")
 	BandUnknown = Band("unknown")
 )
 
