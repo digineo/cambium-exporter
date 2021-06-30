@@ -15,8 +15,10 @@ type Collector struct {
 
 var _ prometheus.Collector = (*Collector)(nil)
 
+const namespace = "cambium_maestro"
+
 var (
-	ctrlUp = prometheus.NewDesc("cambium_maestro_up", "indicator whether cloud controller is reachable", nil, nil)
+	ctrlUp = prometheus.NewDesc(namespace+"up", "indicator whether cloud controller is reachable", nil, nil)
 
 	groupLabels           = []string{"name"} // used in groupDesc
 	groupDevicesCount     = groupDesc("devices_count", "number of adopted devices")
@@ -116,6 +118,7 @@ func (c *Collector) Collect(ch chan<- prometheus.Metric) {
 			intMetric(radioPower, r.Power, name, mac, band)
 			intMetric(radioQuality, r.Quality, name, mac, band)
 
+			// controller reports kBit/s, we export Bit/s
 			intMetric(radioXfer, r.Tx*1000, name, mac, band, "out")
 			intMetric(radioXfer, r.Rx*1000, name, mac, band, "in")
 		}
@@ -123,19 +126,19 @@ func (c *Collector) Collect(ch chan<- prometheus.Metric) {
 }
 
 func groupDesc(name, help string, extraLabel ...string) *prometheus.Desc {
-	fqdn := prometheus.BuildFQName("cambium", "maestro_ap_group", name)
+	fqdn := prometheus.BuildFQName(namespace, "ap_group", name)
 
 	return prometheus.NewDesc(fqdn, help, groupLabels, nil)
 }
 
 func apDesc(name, help string, extraLabel ...string) *prometheus.Desc {
-	fqdn := prometheus.BuildFQName("cambium", "maestro_ap", name)
+	fqdn := prometheus.BuildFQName(namespace, "ap", name)
 
 	return prometheus.NewDesc(fqdn, help, append(apLabels, extraLabel...), nil)
 }
 
 func radioDesc(name, help string, extraLabel ...string) *prometheus.Desc {
-	fqdn := prometheus.BuildFQName("cambium", "maestro_ap_radio", name)
+	fqdn := prometheus.BuildFQName(namespace, "ap_radio", name)
 
 	return prometheus.NewDesc(fqdn, help, append(radioLabels, extraLabel...), nil)
 }
