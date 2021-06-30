@@ -103,8 +103,8 @@ type Device struct {
 	SiteName        string
 	Hostname        string
 	FirmwareVersion string
-	Uptime          *time.Duration
-	Downtime        *time.Duration
+	Uptime          *time.Time
+	Downtime        *time.Time
 	LastRebootAt    *time.Time
 	RebootReason    string
 	Radios          []Radio
@@ -126,14 +126,12 @@ func (api *DeviceAPIResponse) Normalize() *Device {
 		FirmwareVersion: api.Management.FirmwareVersion,
 	}
 
-	now := time.Now()
 	if api.System.Online {
-		// device is down
-		dur := now.Sub(msToTime(api.System.UpTime))
-		dev.Uptime = &dur
+		t := msToTime(api.System.UpTime)
+		dev.Uptime = &t
 	} else {
-		dur := now.Sub(msToTime(api.System.DownTime))
-		dev.Downtime = &dur
+		t := msToTime(api.System.DownTime)
+		dev.Downtime = &t
 	}
 
 	if len(api.System.Reboots) > 0 {

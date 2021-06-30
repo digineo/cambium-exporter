@@ -67,8 +67,9 @@ func (c *Collector) Collect(ch chan<- prometheus.Metric) {
 	intMetric := func(desc *prometheus.Desc, v int, labels ...string) {
 		metric(desc, float64(v), labels...)
 	}
-	durMetric := func(desc *prometheus.Desc, v time.Duration, labels ...string) {
-		metric(desc, v.Seconds(), labels...)
+	now := time.Now()
+	timeMetric := func(desc *prometheus.Desc, v time.Time, labels ...string) {
+		metric(desc, now.Sub(v).Seconds(), labels...)
 	}
 
 	group, err := c.client.fetchAPGroupData(c.ctx, c.apGroup)
@@ -98,14 +99,14 @@ func (c *Collector) Collect(ch chan<- prometheus.Metric) {
 		mac := dev.MAC
 		metric(apUp, 1, name, mac, dev.Model, dev.Hostname, dev.Serial, dev.SiteName, dev.FirmwareVersion)
 
-		if dev.Uptime != nil {
-			durMetric(apUptime, *dev.Uptime, name, mac)
+		if t := dev.Uptime; t != nil {
+			timeMetric(apUptime, *t, name, mac)
 		}
-		if dev.Downtime != nil {
-			durMetric(apDowntime, *dev.Downtime, name, mac)
+		if t := dev.Downtime; t != nil {
+			timeMetric(apDowntime, *t, name, mac)
 		}
-		if dev.LastRebootAt != nil {
-			durMetric(apReboot, time.Now().Sub(*dev.LastRebootAt), name, mac, dev.RebootReason)
+		if t := dev.LastRebootAt; t != nil {
+			timeMetric(apReboot, *t, name, mac, dev.RebootReason)
 		}
 
 		for _, r := range dev.Radios {
