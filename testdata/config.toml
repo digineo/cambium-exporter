@@ -1,0 +1,10 @@
+# Start dev server first:
+#
+#   cd testdata
+#   gem install bundler
+#   bundle install
+#   ruby app.rb
+#
+Username = "anything@example.com"
+Password = "sup3rs3cr3t"
+Instance = "http://localhost:4567"

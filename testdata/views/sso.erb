@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SSO Log In</title>
+</head>
+<body>
+  <form id="login" method="POST" action="/login" style="display:none">
+    <h2>Please sign in</h2>
+    <input type="email" placeholder="Email address" name="email" value="" autofocus="">
+    <input type="password" name="password" placeholder="Password">
+    <label>
+      <input type="checkbox" name="remember" value="yes">
+      Remember me
+    </label>
+    <button type="submit">Sign in</button>
+  </form>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      // simulate app loading
+      setTimeout(() => {
+        document.getElementById("login").style.display = "block"
+      }, 1500)
+    })
+  </script>
+</body>
+</html>
