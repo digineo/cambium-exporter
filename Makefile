@@ -12,7 +12,7 @@ ifeq ($(RELEASE),0)
 	goreleaser release --rm-dist --skip-publish --snapshot
 	docker build --tag $(DOCKER_TAG) --pull .
 else
-	goreleaser release --rm-dist --skip-sign --skip-publish --auto-snapshot --release-footer debian/release-footer.md
-	docker built --tag $(DOCKER_TAG) --pull .
+	goreleaser release --rm-dist --skip-sign --release-footer debian/release-footer.md
+	docker build --tag $(DOCKER_TAG) --pull .
 	docker push $(DOCKER_TAG)
 endif
