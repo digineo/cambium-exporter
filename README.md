@@ -5,8 +5,23 @@ This is a [Prometheus](https://prometheus.io/) exporter for the
 
 ## Installation
 
-Use one oth the pre-built [binary releases](https://github.com/digineo/cambium-exporter),
-or compile and install it using the Go toolchain:
+### Pre-built binary releases
+
+Head to the [release page](https://github.com/digineo/cambium-exporter)
+for download.
+
+### Docker
+
+Alternatively, you can use Docker:
+
+```console
+$ docker run -v /path/to/config.toml:config.toml:ro -p 9836:9836 digineode/cambium-exporter
+```
+
+### Build it yourself
+
+Last but not least, you can compile and install the exporter using the
+Go toolchain:
 
 ```console
 $ go install github.com/digineo/cambium-exporter@latest
@@ -19,42 +34,13 @@ $ go install github.com/digineo/cambium-exporter@latest
 You need a `config.toml` with the following content:
 
 ```toml
-Instance = "https://<your-instance>.cloud.cambiumnetworks.com/"
-SessionID = "<sid cookie>"
+Username = "<login email address>"
+Password = "<login password>"
+Instance = "https://<your instance>.cloud.cambiumnetworks.com/"
 ```
 
-The `Instance` is the URL to your cloud controller. Authentication (for
-this exporter) is a bit cumbersome, since the cloud controller does not
-provide a publicy accessible API.
-
-<details><summary>Obtaining the session cookie</summary>
-
-You need to undertake the following steps to obtain the session cookie
-(assuming you already have a login to the controller, and permissions to
-create new users):
-
-0. Log into your controller instance.
-1. Under "Administration" → "Users", click on "Add User", and fill in an
-   email address and select "Monitor" from "Role". Then click on "Send"
-   to send an invitation to that email address.
-2. When receiving the invitation, open the link in a new private browser
-   window. You need to register a new, dedicated account for the email
-   address entered above.
-3. Upon completing the registration, you should see an outstanding
-   invitation in your account dashboard. Click on "accept". You will be
-   redirected to the cloud controller dashboard.
-4. Open the Browser developer tools (<kbd>Ctrl+Shift+I</kbd> or
-   <kbd>F12</kbd> on Firefox), and you will find the `sid` cookie in the
-   "Storage" tab. Copy only its value into the `config.toml` file.
-5. Close the private window - DO NOT LOGOUT (this invalidates the session
-   cookie).
-
-If you find the exporter to stop working, you probably need to refresh
-the `SessionID` configuration. To do so, open a private browser window,
-and log into your controller instance with the Monitor account. Then
-repeat the last two steps.
-
-</details>
+It is **strongly recommended**, that you create a separate user for the
+exporter (with role "Monitor").
 
 If you use the Debian package, just edit `/etc/cambium-exporter/config.toml`
 and restart the exporter by running `systemctl restart `cambium-exporter`.

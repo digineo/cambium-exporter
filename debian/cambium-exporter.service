@@ -8,6 +8,7 @@ ExecStart=/usr/bin/cambium-exporter --config=/etc/cambium-exporter/config.toml $
 User=cambium-exporter
 ProtectSystem=strict
 ProtectHome=yes
+PrivateTmp=yes
 ReadOnlyPaths=/etc/cambium-exporter
 
 [Install]
