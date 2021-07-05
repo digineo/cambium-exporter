@@ -1,11 +1,14 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
 	"runtime/debug"
+	"time"
 
+	"github.com/digineo/cambium-exporter/auth"
 	"github.com/digineo/cambium-exporter/exporter"
 
 	kingpin "gopkg.in/alecthomas/kingpin.v2"
@@ -25,21 +28,10 @@ var (
 func main() {
 	log.SetFlags(log.Lshortfile)
 
-	listenAddress := kingpin.Flag(
-		"web.listen-address",
-		"Address on which to expose metrics and web interface.",
-	).Default(":9836").String()
-
-	configFile := kingpin.Flag(
-		"config",
-		"Path to configuration file.",
-	).Default(DefaultConfigPath).String()
-
-	versionFlag := kingpin.Flag(
-		"version",
-		"Print version information and exit.",
-	).Short('v').Bool()
-
+	listenAddress := kingpin.Flag("web.listen-address", "Address on which to expose metrics and web interface.").Default(":9836").String()
+	configFile := kingpin.Flag("config", "Path to configuration file.").Default(DefaultConfigPath).String()
+	performLogin := kingpin.Flag("login", "Perform login test, and dump session cookie.").Bool()
+	versionFlag := kingpin.Flag("version", "Print version information and exit.").Short('v').Bool()
 	kingpin.HelpFlag.Short('h')
 	kingpin.Parse()
 
@@ -48,9 +40,31 @@ func main() {
 		os.Exit(0)
 	}
 
+	if headless := os.Getenv("HEADLESS"); headless == "0" {
+		auth.SetHeadless(false)
+	}
+	if binary := os.Getenv("CHROME_BINARY"); binary != "" {
+		auth.SetExecPath(binary)
+	}
+
 	client, err := exporter.LoadClientConfig(*configFile)
 	if err != nil {
 		log.Fatal(err.Error())
+	}
+
+	if *performLogin {
+		ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
+		defer cancel()
+
+		info, err := auth.Login(ctx, client.Instance, client.Username, client.Password)
+		if err != nil {
+			log.Fatalf("login failed: %v", err)
+
+			return
+		}
+		log.Printf("login succeeded: %+v", info)
+
+		return
 	}
 
 	client.Start(*listenAddress, version)
