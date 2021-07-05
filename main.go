@@ -67,7 +67,7 @@ func main() {
 		return
 	}
 
-	client.Start(*listenAddress, version)
+	log.Fatal(client.Start(*listenAddress, version))
 }
 
 func printVersion() {

@@ -66,6 +66,7 @@ func Login(ctx context.Context, instanceUrl, username, password string) (*AuthIn
 	taskCtx, tCancel := chrome.NewContext(allocCtx, chrome.WithLogf(log.Printf))
 	defer tCancel()
 
+	info := AuthInfo{}
 	actions := []chrome.Action{
 		chrome.Navigate(instanceUrl),
 		chrome.WaitVisible(`a[href="/cn-rtr/sso"]`),
@@ -78,10 +79,8 @@ func Login(ctx context.Context, instanceUrl, username, password string) (*AuthIn
 		chrome.Click(`input[name="remember"]`),
 		chrome.Click(`button[type="submit"]`),
 		wait(5*time.Second),
+		extractCookies(&info),
 	)
-
-	info := AuthInfo{}
-	actions = append(actions, extractCookies(&info))
 
 	if err := chrome.Run(taskCtx, actions...); err != nil {
 		return nil, fmt.Errorf("failed to login: %w", err)

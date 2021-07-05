@@ -11,7 +11,13 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
-func (c *Client) Start(listenAddress, version string) {
+func (c *Client) Start(listenAddress, version string) error {
+	if err := c.login(); err != nil {
+		return err
+	}
+
+	go c.startSessionRefresh()
+
 	router := httprouter.New()
 	router.GET("/", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 		apGroups, err := c.fetchAPGroups(r.Context())
@@ -34,7 +40,8 @@ func (c *Client) Start(listenAddress, version string) {
 	router.GET("/apgroups/:ap_group/metrics", c.metricsHandler)
 
 	log.Printf("Starting exporter on http://%s/", listenAddress)
-	log.Fatal(http.ListenAndServe(listenAddress, router))
+
+	return http.ListenAndServe(listenAddress, router)
 }
 
 func (c *Client) listAPGroups(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {

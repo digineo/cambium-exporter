@@ -40,12 +40,12 @@ func LoadClientConfig(file string) (*Client, error) {
 	}
 	defer f.Close()
 
-	cfg := Client{}
-	if err := toml.NewDecoder(f).Strict(true).Decode(&cfg); err != nil {
+	c := Client{}
+	if err := toml.NewDecoder(f).Strict(true).Decode(&c); err != nil {
 		return nil, fmt.Errorf("loading config file %q failed: %w", file, err)
 	}
 
-	uri, err := url.Parse(cfg.Instance)
+	uri, err := url.Parse(c.Instance)
 	if err != nil {
 		return nil, fmt.Errorf("invalid instance url: %w", err)
 	}
@@ -55,33 +55,10 @@ func LoadClientConfig(file string) (*Client, error) {
 		return nil, fmt.Errorf("invalid cookies: %w", err)
 	}
 
-	cfg.instance = uri
-	cfg.client = &http.Client{Jar: jar}
+	c.instance = uri
+	c.client = &http.Client{Jar: jar}
 
-	if err := cfg.login(); err != nil {
-		return nil, err
-	}
-
-	go func() {
-		t := time.NewTicker(sessionRefreshInterval)
-		failures := 0
-
-		for range t.C {
-			if err := cfg.login(); err != nil {
-				log.Printf("session refresh failed: %v", err)
-				failures++
-				if failures > sessionRefreshRetries {
-					log.Fatal("could not refresh session for 12+ hours, aborting")
-				}
-
-				t.Reset(sessionRefershRetryInterval)
-			} else {
-				t.Reset(sessionRefreshInterval)
-			}
-		}
-	}()
-
-	return &cfg, nil
+	return &c, nil
 }
 
 func (c *Client) login() error {
@@ -118,4 +95,23 @@ func (c *Client) getCsrfToken() string {
 	}
 
 	return ""
+}
+
+func (c *Client) startSessionRefresh() {
+	t := time.NewTicker(sessionRefreshInterval)
+	failures := 0
+
+	for range t.C {
+		if err := c.login(); err != nil {
+			log.Printf("session refresh failed: %v", err)
+			failures++
+			if failures > sessionRefreshRetries {
+				log.Fatal("could not refresh session for 12+ hours, aborting")
+			}
+
+			t.Reset(sessionRefershRetryInterval)
+		} else {
+			t.Reset(sessionRefreshInterval)
+		}
+	}
 }
