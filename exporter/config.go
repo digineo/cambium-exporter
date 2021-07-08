@@ -22,6 +22,7 @@ type Client struct {
 	instance *url.URL
 	client   *http.Client
 	authInfo *auth.AuthInfo
+	log      logger
 }
 
 const (
@@ -33,14 +34,14 @@ const (
 
 // LoadClientConfig loads the configuration from a file and initializes
 // the client.
-func LoadClientConfig(file string) (*Client, error) {
+func LoadClientConfig(file string, verbose bool) (*Client, error) {
 	f, err := os.Open(file)
 	if err != nil {
 		return nil, fmt.Errorf("failed to open config file %q: %w", file, err)
 	}
 	defer f.Close()
 
-	c := Client{}
+	c := Client{log: logger(verbose)}
 	if err := toml.NewDecoder(f).Strict(true).Decode(&c); err != nil {
 		return nil, fmt.Errorf("loading config file %q failed: %w", file, err)
 	}
@@ -62,11 +63,14 @@ func LoadClientConfig(file string) (*Client, error) {
 }
 
 func (c *Client) login() error {
+	c.log.Debugf("performing login")
 	ctx, cancel := context.WithTimeout(context.Background(), loginTimeout)
 	defer cancel()
 
 	info, err := auth.Login(ctx, c.Instance, c.Username, c.Password)
 	if err != nil {
+		c.log.Errorf("login failed: %v", err)
+
 		return err
 	}
 
@@ -74,9 +78,11 @@ func (c *Client) login() error {
 	if info.XSRFToken == "" {
 		xsrfCookie.MaxAge = -1
 	} else {
+		c.log.Debugf("login: got xsrf token")
 		xsrfCookie.Value = info.XSRFToken
 	}
 
+	c.log.Debugf("login: got session token")
 	sidCookie := &http.Cookie{
 		Name:  "sid",
 		Value: info.SessionID,
@@ -103,7 +109,7 @@ func (c *Client) startSessionRefresh() {
 
 	for range t.C {
 		if err := c.login(); err != nil {
-			log.Printf("session refresh failed: %v", err)
+			c.log.Errorf("session refresh failed: %v", err)
 			failures++
 			if failures > sessionRefreshRetries {
 				log.Fatal("could not refresh session for 12+ hours, aborting")

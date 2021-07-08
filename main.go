@@ -31,6 +31,7 @@ func main() {
 	listenAddress := kingpin.Flag("web.listen-address", "Address on which to expose metrics and web interface.").Default(":9836").String()
 	configFile := kingpin.Flag("config", "Path to configuration file.").Default(DefaultConfigPath).String()
 	performLogin := kingpin.Flag("login", "Perform login test, and dump session cookie.").Bool()
+	verbose := kingpin.Flag("verbose", "Increase log verbosity.").Short('V').Bool()
 	versionFlag := kingpin.Flag("version", "Print version information and exit.").Short('v').Bool()
 	kingpin.HelpFlag.Short('h')
 	kingpin.Parse()
@@ -47,7 +48,7 @@ func main() {
 		auth.SetExecPath(binary)
 	}
 
-	client, err := exporter.LoadClientConfig(*configFile)
+	client, err := exporter.LoadClientConfig(*configFile, *verbose)
 	if err != nil {
 		log.Fatal(err.Error())
 	}

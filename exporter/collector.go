@@ -63,6 +63,8 @@ func (*Collector) Describe(ch chan<- *prometheus.Desc) {
 }
 
 func (c *Collector) Collect(ch chan<- prometheus.Metric) {
+	c.client.log.Debugf("collecting metrics for %s", c.apGroup)
+
 	metric := func(desc *prometheus.Desc, v float64, labels ...string) {
 		ch <- prometheus.MustNewConstMetric(desc, prometheus.GaugeValue, v, labels...)
 	}
@@ -76,6 +78,7 @@ func (c *Collector) Collect(ch chan<- prometheus.Metric) {
 
 	group, err := c.client.fetchAPGroupData(c.ctx, c.apGroup)
 	if err != nil {
+		c.client.log.Errorf("fetching AP group data for %s failed with %v", c.apGroup, err)
 		metric(ctrlUp, 0)
 
 		return
@@ -83,6 +86,7 @@ func (c *Collector) Collect(ch chan<- prometheus.Metric) {
 
 	devices, err := c.client.fetchDevices(c.ctx, c.apGroup)
 	if err != nil {
+		c.client.log.Errorf("fetching device data for %s failed with %v", c.apGroup, err)
 		metric(ctrlUp, 0)
 
 		return
