@@ -1,19 +1,22 @@
 package exporter
 
-import "log"
+import (
+	"fmt"
+	"log"
+)
 
 type logger bool
 
 func (logger) Errorf(format string, v ...interface{}) {
-	log.Printf("[error] "+format, v...)
+	log.Output(2, fmt.Sprintf("[error] "+format, v...))
 }
 
 func (logger) Infof(format string, v ...interface{}) {
-	log.Printf("[info]  "+format, v...)
+	log.Output(2, fmt.Sprintf("[info] "+format, v...))
 }
 
 func (l logger) Debugf(format string, v ...interface{}) {
 	if l {
-		log.Printf("[debug] "+format, v...)
+		log.Output(2, fmt.Sprintf("[debug] "+format, v...))
 	}
 }
