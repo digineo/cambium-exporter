@@ -2,8 +2,10 @@ package exporter
 
 import (
 	"encoding/json"
+	"fmt"
 	"html/template"
 	"log"
+	"net"
 	"net/http"
 
 	"github.com/julienschmidt/httprouter"
@@ -39,7 +41,14 @@ func (c *Client) Start(listenAddress, version string) error {
 	router.GET("/apgroups/:ap_group/debug", c.debugHandler)
 	router.GET("/apgroups/:ap_group/metrics", c.metricsHandler)
 
-	log.Printf("Starting exporter on http://%s/", listenAddress)
+	var where string
+	if host, port, err := net.SplitHostPort(listenAddress); err == nil && host == "" {
+		where = fmt.Sprintf("http://0.0.0.0:%s/", port)
+	} else {
+		where = fmt.Sprintf("http://%s/", listenAddress)
+	}
+
+	c.log.Infof("Starting exporter on %s", where)
 
 	return http.ListenAndServe(listenAddress, router)
 }

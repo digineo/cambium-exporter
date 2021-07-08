@@ -63,7 +63,7 @@ func LoadClientConfig(file string, verbose bool) (*Client, error) {
 }
 
 func (c *Client) login() error {
-	c.log.Debugf("performing login")
+	c.log.Infof("performing login")
 	ctx, cancel := context.WithTimeout(context.Background(), loginTimeout)
 	defer cancel()
 
