@@ -7,8 +7,8 @@ This is a [Prometheus](https://prometheus.io/) exporter for the
 
 ### Pre-built binary releases
 
-Head to the [release page](https://github.com/digineo/cambium-exporter)
-for download.
+Head to the [release page](https://github.com/digineo/cambium-exporter/releases)
+for downloads.
 
 ### Docker
 
