@@ -145,7 +145,7 @@ scrape_configs:
         replacement: 127.0.0.1:9836
 ```
 
-</summary>
+</details>
 
 ## License
 
