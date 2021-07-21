@@ -161,3 +161,35 @@ type APGroupAPIResponse struct {
 	ClientCount      int    `json:"clientCount"`
 	ClientCount24H   int    `json:"clientCount24h"`
 }
+
+// PortalAPIResponse is returned when asking the API for a list of
+// "Guest Access Portals". It also contains a JSON-encoded config string
+// (yes, double JSON). We've elected to omit this it here.
+type PortalAPIResponse struct {
+	Name string `json:"name"`
+}
+
+type SessionsAPIResponse struct {
+	Meta struct {
+		Limit  int `json:"limit"`
+		Offset int `json:"offset"`
+		Total  int `json:"totalCount"`
+	} `json:"_metadata"`
+
+	Sessions []struct {
+		DeviceMAC string `json:"apMAC"`
+		// Expiry      int    `json:"expiry"`      // omitted, not measured
+		// Validity    int    `json:"validity"`    // omitted, not measured
+		// ClientMAC   string `json:"clientMac"`   // omitted, PII
+		// WLAN        string `json:"wlan"`        // omitted, part of portal config
+		// PortalName  string `json:"portalName"`  // omitted, part of the request
+		// AccessType  string `json:"accessType"`  // omitted, part of portal config
+		// VoucherCode string `json:"voucherCode"` // omitted, volatile
+	} `json:"result"`
+}
+
+type PortalSession struct {
+	DeviceMAC  string
+	PortalName string
+	Sessions   int
+}

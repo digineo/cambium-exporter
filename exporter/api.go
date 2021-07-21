@@ -8,8 +8,10 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 	"sync"
+	"time"
 )
 
 const userAgent = "Mozilla/5.0 (X11; Linux x86_64; rv:89.0) Gecko/20100101 Firefox/89.0"
@@ -195,4 +197,85 @@ func (c *Client) fetchAPGroupData(ctx context.Context, apGroup string) (*APGroup
 	apg := data.Data.Profiles[0]
 
 	return &apg, nil
+}
+
+func (c *Client) fetchGuestPortals(ctx context.Context) ([]string, error) {
+	res, err := c.fetch(ctx, http.MethodGet, "/services/guest/portal", url.Values{
+		"limit":  {"10"},
+		"offset": {"0"},
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch guest portal list: %w", err)
+	}
+
+	defer res.Body.Close()
+	var data struct {
+		Data struct {
+			Portals []PortalAPIResponse `json:"result"`
+		} `json:"data"`
+	}
+	if err = json.NewDecoder(res.Body).Decode(&data); err != nil {
+		return nil, fmt.Errorf("failed to decode guest portal response: %w", err)
+	}
+	if len(data.Data.Portals) == 0 {
+		return nil, nil
+	}
+
+	names := make([]string, 0, len(data.Data.Portals))
+	for _, portal := range data.Data.Portals {
+		names = append(names, portal.Name)
+	}
+
+	return names, nil
+}
+
+const sessionsPerPage = 200
+
+func (c *Client) fetchPortalSessions(ctx context.Context, name string) ([]*PortalSession, int, error) {
+	count := make(map[string]int) // key = AP MAC address
+	total := 0
+
+	for page := 0; ; page++ {
+		data, err := c.fetchPortalSessionsPage(ctx, name, page)
+		if err != nil {
+			return nil, 0, fmt.Errorf("failed to decode portal session data for portal %s (page %d): %w", name, page, err)
+		}
+
+		for _, s := range data.Sessions {
+			count[s.DeviceMAC]++
+		}
+
+		if total = data.Meta.Total; total < sessionsPerPage*(page+1) {
+			break // no more results on the next page
+		}
+	}
+
+	sessions := make([]*PortalSession, 0, len(count))
+	for mac, n := range count {
+		sessions = append(sessions, &PortalSession{
+			DeviceMAC:  mac,
+			Sessions:   n,
+			PortalName: name,
+		})
+	}
+
+	return sessions, total, nil
+}
+
+func (c *Client) fetchPortalSessionsPage(ctx context.Context, name string, page int) (*SessionsAPIResponse, error) {
+	res, err := c.fetch(ctx, http.MethodGet, "/services/guest/session/"+name, url.Values{
+		"limit":  {strconv.Itoa(sessionsPerPage)},
+		"offset": {strconv.Itoa(sessionsPerPage * page)},
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	defer res.Body.Close()
+	var data struct {
+		Data SessionsAPIResponse `json:"data"`
+	}
+	err = json.NewDecoder(res.Body).Decode(&data)
+
+	return &data.Data, err
 }

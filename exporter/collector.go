@@ -13,6 +13,12 @@ type Collector struct {
 	ctx     context.Context // HTTP request context
 }
 
+type PortalCollector struct {
+	client *Client
+	portal string          // Guest access portal name
+	ctx    context.Context // HTTP request context
+}
+
 var _ prometheus.Collector = (*Collector)(nil)
 
 const namespace = "cambium_maestro"
@@ -39,6 +45,9 @@ var (
 	radioPower        = radioDesc("power", "RF transmit power")
 	radioQuality      = radioDesc("quality", "RF quality measurement in percentage points")
 	radioXfer         = radioDesc("transfer_rate", "current traffic rate in bps", "direction")
+
+	portalSessions   = prometheus.NewDesc(namespace+"_sessions_count", "number of active sessions", []string{"name"}, nil)
+	portalAPSessions = prometheus.NewDesc(namespace+"_ap_sessions_count", "number of active sessions", []string{"portal", "mac"}, nil)
 )
 
 func (*Collector) Describe(ch chan<- *prometheus.Desc) {
@@ -122,6 +131,35 @@ func (c *Collector) Collect(ch chan<- prometheus.Metric) {
 			intMetric(radioXfer, r.Tx*1000, name, mac, band, "out")
 			intMetric(radioXfer, r.Rx*1000, name, mac, band, "in")
 		}
+	}
+}
+
+func (p *PortalCollector) Describe(ch chan<- *prometheus.Desc) {
+	ch <- ctrlUp
+	ch <- portalSessions
+	ch <- portalAPSessions
+}
+
+func (c *PortalCollector) Collect(ch chan<- prometheus.Metric) {
+	c.client.log.Debugf("collecting metrics for portal %s", c.portal)
+
+	metric := func(desc *prometheus.Desc, v float64, labels ...string) {
+		ch <- prometheus.MustNewConstMetric(desc, prometheus.GaugeValue, v, labels...)
+	}
+
+	sessions, total, err := c.client.fetchPortalSessions(c.ctx, c.portal)
+	if err != nil {
+		c.client.log.Errorf("fetching portal data for %s failed with %v", c.portal, err)
+		metric(ctrlUp, 0)
+
+		return
+	}
+
+	metric(ctrlUp, 1)
+	metric(portalSessions, float64(total), c.portal)
+
+	for _, s := range sessions {
+		metric(portalAPSessions, float64(s.Sessions), c.portal, s.DeviceMAC)
 	}
 }
 
