@@ -4,7 +4,7 @@ RELEASE ?= 0
 
 .PHONY: dev
 dev: config.toml
-	go run main.go --config $<
+	go run main.go --config $< --verbose
 
 .PHONY: release
 release:
