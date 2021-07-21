@@ -1,0 +1,61 @@
+<!doctype html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>Cambium cnMaestro Cloud Exporter (Version {{ .Version }})</title>
+
+  <style>
+    html, body, table { font: 14px/1.3 sans-serif }
+    table { border-collapse: collapse; border: solid #333; border-width: 1px 0 }
+    thead th { border-bottom: 2px solid #333 }
+    tbody td { border-top: 1px solid #333 }
+    td, th { text-align: left; vertical-align: top; padding: 3px 6px }
+    a { color: #00f }
+    a:visited { color: #00f }
+    a:hover { text-decoration: none }
+  </style>
+</head>
+<body>
+	<h1>Cambium cnMaestro Cloud Exporter</h1>
+	<p>Version: {{ .Version }}</p>
+	<p><a href="{{ .Instance }}" target="_blank">Open controller in new tab.</a></p>
+
+	<h2>Endpoints</h2>
+
+  <h3>WiFi AP Group targets</h3>
+
+	<table>
+    <thead>
+      <tr>
+        <th>Target name</th>
+        <th>Debug data</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      {{ range .Groups }}<tr>
+        <td><a href="/apgroups/{{ . }}/metrics"><code>apgroups/{{ . }}</code></a></td>
+        <td><a href="/apgroups/{{ . }}/debug">JSON</a></td>
+      </tr>{{ end }}
+    </tbody>
+  </table>
+
+  <h3>Guest Access Portals</h3>
+
+	<table>
+    <thead>
+      <tr>
+        <th>Target name</th>
+        <th>Debug data</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      {{ range .Portals }}<tr>
+        <td><a href="/portals/{{ . }}/metrics"><code>portals/{{ . }}</code></a></td>
+        <td><a href="/portals/{{ . }}/debug">JSON</a></td>
+      </tr>{{ end }}
+    </tbody>
+  </table>
+</body>
+</html>

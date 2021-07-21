@@ -1,6 +1,7 @@
 package exporter
 
 import (
+	_ "embed"
 	"encoding/json"
 	"fmt"
 	"html/template"
@@ -27,9 +28,15 @@ func (c *Client) Start(listenAddress, version string) error {
 			log.Printf("fetching AP groups failed: %v", err)
 		}
 
+		portals, err := c.fetchGuestPortals(r.Context())
+		if err != nil {
+			log.Printf("fetching guest portals failed: %v", err)
+		}
+
 		err = tmpl.Execute(w, &indexVariables{
 			Instance: c.instance.String(),
 			Groups:   apGroups,
+			Portals:  portals,
 			Version:  version,
 		})
 		if err != nil {
@@ -155,35 +162,11 @@ func (c *Client) portalDebugHandler(w http.ResponseWriter, r *http.Request, para
 type indexVariables struct {
 	Instance string
 	Groups   []string
+	Portals  []string
 	Version  string
 }
 
-var tmpl = template.Must(template.New("index").Option("missingkey=error").Parse(`<!doctype html>
-<html>
-<head>
-	<meta charset="UTF-8">
-	<title>Cambium cnMaestro Cloud Exporter (Version {{.Version}})</title>
-</head>
-<body>
-	<h1>Cambium cnMaestro Cloud Exporter</h1>
-	<p>Version: {{.Version}}</p>
-	<p><a href="{{ .Instance }}" target="_blank">Open controller in new tab.</a></p>
+//go:embed exporter.html
+var tmplData string
 
-	<h2>Endpoints</h2>
-	<ul>
-		<li>
-			<a href="/apgroups">List of WiFi AP Group names</a> (JSON)
-		</li>
-		<li>
-			<strong>Metrics</strong>
-			<ul>{{ range .Groups }}
-				<li>
-					<a href="/apgroups/{{ . }}/metrics">{{ . }}</a> &bull;
-					<a href="/apgroups/{{ . }}/debug">debug data</a> (JSON)
-				</li>
-			{{ end }}</ul>
-		</li>
-	</ul>
-</body>
-</html>
-`))
+var tmpl = template.Must(template.New("index").Option("missingkey=error").Parse(tmplData))
