@@ -9,9 +9,27 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"sync"
 )
 
 const userAgent = "Mozilla/5.0 (X11; Linux x86_64; rv:89.0) Gecko/20100101 Firefox/89.0"
+
+type responseBuffer struct {
+	bytes.Buffer
+}
+
+var bpool = &sync.Pool{
+	New: func() interface{} {
+		return new(responseBuffer)
+	},
+}
+
+func (rb *responseBuffer) Close() error {
+	rb.Buffer.Reset()
+	bpool.Put(rb)
+
+	return nil
+}
 
 // newRequest creates a new HTTP request and prefills its header.
 func (c *Client) fetch(ctx context.Context, method, path string, params url.Values) (*http.Response, error) {
@@ -23,8 +41,9 @@ func (c *Client) fetch(ctx context.Context, method, path string, params url.Valu
 	}
 	u2.Path += path
 	u2.RawQuery = params.Encode()
+	url := u2.String()
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, u2.String(), nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to construct HTTP request: %w", err)
 	}
@@ -38,7 +57,25 @@ func (c *Client) fetch(ctx context.Context, method, path string, params url.Valu
 		req.Header["X-XSRF-TOKEN"] = []string{token}
 	}
 
-	return c.client.Do(req)
+	t0 := time.Now()
+	res, err := c.client.Do(req)
+	if err == nil {
+		buf, _ := bpool.Get().(*responseBuffer)
+		io.Copy(buf, res.Body)
+		res.Body.Close()
+		res.Body = buf
+
+		c.log.Debugf("fetch %s (status %d) %d bytes in %v",
+			url,
+			res.StatusCode,
+			buf.Len(),
+			time.Now().Sub(t0),
+		)
+	} else {
+		c.log.Infof("error fetching %s: %v", url, err)
+	}
+
+	return res, err
 }
 
 // fetchCSRFToken is needed to get the initial CSRF cookie, needed for
@@ -143,15 +180,12 @@ func (c *Client) fetchAPGroupData(ctx context.Context, apGroup string) (*APGroup
 	}
 
 	defer res.Body.Close()
-	var buf bytes.Buffer
-	tee := io.TeeReader(res.Body, &buf)
-
 	var data struct {
 		Data struct {
 			Profiles []APGroupAPIResponse `json:"profiles"`
 		} `json:"data"`
 	}
-	if err = json.NewDecoder(tee).Decode(&data); err != nil {
+	if err = json.NewDecoder(res.Body).Decode(&data); err != nil {
 		return nil, fmt.Errorf("failed to decode device response data for AP group %q: %w", apGroup, err)
 	}
 	if len(data.Data.Profiles) == 0 {
