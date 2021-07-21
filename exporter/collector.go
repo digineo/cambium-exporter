@@ -72,8 +72,10 @@ func (c *Collector) Collect(ch chan<- prometheus.Metric) {
 		metric(desc, float64(v), labels...)
 	}
 	now := time.Now()
-	timeMetric := func(desc *prometheus.Desc, v time.Time, labels ...string) {
-		metric(desc, now.Sub(v).Seconds(), labels...)
+	timeMetric := func(desc *prometheus.Desc, v *time.Time, labels ...string) {
+		if v != nil {
+			metric(desc, now.Sub(*v).Seconds(), labels...)
+		}
 	}
 
 	group, err := c.client.fetchAPGroupData(c.ctx, c.apGroup)
@@ -105,15 +107,9 @@ func (c *Collector) Collect(ch chan<- prometheus.Metric) {
 		mac := dev.MAC
 		metric(apUp, 1, name, mac, dev.Model, dev.Hostname, dev.Serial, dev.SiteName, dev.FirmwareVersion)
 
-		if t := dev.Uptime; t != nil {
-			timeMetric(apUptime, *t, name, mac)
-		}
-		if t := dev.Downtime; t != nil {
-			timeMetric(apDowntime, *t, name, mac)
-		}
-		if t := dev.LastRebootAt; t != nil {
-			timeMetric(apReboot, *t, name, mac, dev.RebootReason)
-		}
+		timeMetric(apUptime, dev.Uptime, name, mac)
+		timeMetric(apDowntime, dev.Downtime, name, mac)
+		timeMetric(apReboot, dev.LastRebootAt, name, mac, dev.RebootReason)
 
 		for _, r := range dev.Radios {
 			band := string(r.Band)
