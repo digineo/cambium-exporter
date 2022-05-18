@@ -19,7 +19,10 @@ type PortalCollector struct {
 	ctx    context.Context // HTTP request context
 }
 
-var _ prometheus.Collector = (*Collector)(nil)
+var (
+	_ prometheus.Collector = (*Collector)(nil)
+	_ prometheus.Collector = (*PortalCollector)(nil)
+)
 
 const namespace = "cambium_maestro"
 

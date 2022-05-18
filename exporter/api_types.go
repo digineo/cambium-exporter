@@ -70,9 +70,9 @@ func (radio radioResponse) Normalize() (r Radio) {
 	}
 
 	switch radio.Band {
-	case "2.4GHz":
+	case "2.4GHz", "2.4 GHz":
 		r.Band = BandBGN
-	case "5GHz":
+	case "5GHz", "5 GHz":
 		r.Band = BandAC
 	}
 
