@@ -51,7 +51,7 @@ func simulateTyping(sel interface{}, text string) []chrome.Action {
 	return actions
 }
 
-func Login(ctx context.Context, instanceUrl, username, password string) (*AuthInfo, error) {
+func Login(ctx context.Context, username, password string) (*AuthInfo, error) {
 	opts := chrome.DefaultExecAllocatorOptions[:]
 	if execPath != nil {
 		opts = append(opts, execPath)
@@ -68,7 +68,7 @@ func Login(ctx context.Context, instanceUrl, username, password string) (*AuthIn
 
 	info := AuthInfo{}
 	actions := []chrome.Action{
-		chrome.Navigate(instanceUrl),
+		chrome.Navigate("https://cloud.cambiumnetworks.com/"),
 		chrome.WaitVisible(`a[href="/cn-rtr/sso"]`),
 		chrome.Click(`a[href="/cn-rtr/sso"]`, chrome.NodeVisible),
 		chrome.WaitVisible(`form#login`),

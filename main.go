@@ -57,7 +57,7 @@ func main() {
 		ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
 		defer cancel()
 
-		info, err := auth.Login(ctx, client.Instance, client.Username, client.Password)
+		info, err := auth.Login(ctx, client.Username, client.Password)
 		if err != nil {
 			log.Fatalf("login failed: %v", err)
 
