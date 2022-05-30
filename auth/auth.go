@@ -71,13 +71,17 @@ func Login(ctx context.Context, username, password string) (*AuthInfo, error) {
 		chrome.Navigate("https://cloud.cambiumnetworks.com/"),
 		chrome.WaitVisible(`a[href="/cn-rtr/sso"]`),
 		chrome.Click(`a[href="/cn-rtr/sso"]`, chrome.NodeVisible),
-		chrome.WaitVisible(`form#login`),
+		chrome.WaitVisible(`input[name="email"`),
 	}
-	actions = append(actions, simulateTyping(`input[name="email"]`, username)...)
+	actions = append(actions, simulateTyping(`input[name="email"`, username)...)
+	actions = append(actions,
+		chrome.Click(`button[name="next"]`),
+		chrome.WaitVisible(`input[name="password"]`),
+	)
 	actions = append(actions, simulateTyping(`input[name="password"]`, password)...)
 	actions = append(actions,
 		chrome.Click(`input[name="remember"]`),
-		chrome.Click(`button[type="submit"]`),
+		chrome.Click(`button[name="submit"]`),
 		wait(5*time.Second),
 		extractCookies(&info),
 	)
