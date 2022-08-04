@@ -61,7 +61,7 @@ func LoadClientConfig(file string, verbose bool) (*Client, error) {
 func (c *Client) login() error {
 	c.log.Infof("performing login")
 
-	info, err := auth.Login(c.Username, c.Password)
+	info, err := auth.Login(c.Username, c.Password, bool(c.log))
 	if err != nil {
 		c.log.Errorf("login failed: %v", err)
 		return err

@@ -43,8 +43,15 @@ func wait(dur time.Duration) chrome.ActionFunc {
 	})
 }
 
-func simulateTyping(sel interface{}, text string) []chrome.Action {
-	actions := make([]chrome.Action, 0, 2*len(text))
+func simulateTyping(sel interface{}, text string, verbose bool, actionName string) []chrome.Action {
+	actions := make([]chrome.Action, 0, 2*len(text)+1)
+	if verbose {
+		actions = append(actions, &actionLogger{
+			log:    true,
+			name:   actionName,
+			Action: chrome.ActionFunc(func(ctx context.Context) error { return nil }),
+		})
+	}
 
 	for _, r := range text {
 		actions = append(actions,
@@ -56,41 +63,70 @@ func simulateTyping(sel interface{}, text string) []chrome.Action {
 	return actions
 }
 
-func Login(username, password string) (*AuthInfo, error) {
+type actionLogger struct {
+	log  bool
+	name string
+	chrome.Action
+}
+
+func (a *actionLogger) Do(ctx context.Context) error {
+	if a.log {
+		log.Println("<login>", a.name)
+	}
+	return a.Action.Do(ctx)
+}
+
+func Login(username, password string, verbose bool) (*AuthInfo, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), loginTimeout)
 	defer cancel()
-	opts := chrome.DefaultExecAllocatorOptions[:]
+
+	opts := append(chrome.DefaultExecAllocatorOptions[:],
+		chrome.DisableGPU,
+	)
 	if execPath != nil {
 		opts = append(opts, execPath)
 	}
 	if headless != nil {
 		opts = append(opts, headless)
 	}
-
 	allocCtx, aCancel := chrome.NewExecAllocator(ctx, opts...)
 	defer aCancel()
 
 	taskCtx, tCancel := chrome.NewContext(allocCtx, chrome.WithLogf(log.Printf))
 	defer tCancel()
 
+	withLog := func(name string, action chrome.Action) chrome.Action {
+		return &actionLogger{log: verbose, name: name, Action: action}
+	}
+
 	info := AuthInfo{}
 	actions := []chrome.Action{
-		chrome.Navigate("https://cloud.cambiumnetworks.com/"),
-		chrome.WaitVisible(`a[href="/cn-rtr/sso"]`),
-		chrome.Click(`a[href="/cn-rtr/sso"]`, chrome.NodeVisible),
-		chrome.WaitVisible(`input[name="email"`),
+		withLog("navigate to cloud.cambiumnetworks.com",
+			chrome.Navigate("https://cloud.cambiumnetworks.com/")),
+		withLog("waiting for page to load",
+			chrome.WaitVisible(`a[href="/cn-rtr/sso"]`)),
+		withLog("navigate to SSO login",
+			chrome.Click(`a[href="/cn-rtr/sso"]`, chrome.NodeVisible)),
+		withLog("waiting for page to load",
+			chrome.WaitVisible(`input[name="email"`)),
 	}
-	actions = append(actions, simulateTyping(`input[name="email"`, username)...)
+	actions = append(actions, simulateTyping(`input[name="email"`, username, verbose, "entering email")...)
 	actions = append(actions,
-		chrome.Click(`button[name="next"]`),
-		chrome.WaitVisible(`input[name="password"]`),
+		withLog("navigate to next page",
+			chrome.Click(`button[name="next"]`)),
+		withLog("waiting for page to load",
+			chrome.WaitVisible(`input[name="password"]`)),
 	)
-	actions = append(actions, simulateTyping(`input[name="password"]`, password)...)
+	actions = append(actions, simulateTyping(`input[name="password"]`, password, verbose, "entering password")...)
 	actions = append(actions,
-		chrome.Click(`input[name="remember"]`),
-		chrome.Click(`button[name="submit"]`),
-		wait(5*time.Second),
-		extractCookies(&info),
+		withLog("ticking 'remember me' checkbox",
+			chrome.Click(`input[name="remember"]`)),
+		withLog("logging in",
+			chrome.Click(`button[name="submit"]`)),
+		withLog("waiting for page to finish animation",
+			wait(5*time.Second)),
+		withLog("extracting session cookie",
+			extractCookies(&info)),
 	)
 
 	if err := chrome.Run(taskCtx, actions...); err != nil {

@@ -57,7 +57,7 @@ func main() {
 	}
 
 	if *performLogin {
-		info, err := auth.Login(client.Username, client.Password)
+		info, err := auth.Login(client.Username, client.Password, *verbose)
 		if err != nil {
 			log.Fatalf("login failed: %v", err)
 			return
