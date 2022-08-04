@@ -12,8 +12,9 @@ import (
 )
 
 var (
-	execPath chrome.ExecAllocatorOption
-	headless chrome.ExecAllocatorOption
+	execPath     chrome.ExecAllocatorOption
+	headless     chrome.ExecAllocatorOption
+	loginTimeout = 5 * time.Minute
 )
 
 // SetExecPath sets the path to the Chromium or Google Chrome binary.
@@ -23,6 +24,10 @@ func SetExecPath(path string) {
 
 func SetHeadless(startHeadless bool) {
 	headless = chrome.Flag("headless", startHeadless)
+}
+
+func SetLoginTimeout(timeout time.Duration) {
+	loginTimeout = timeout
 }
 
 type AuthInfo struct {
@@ -51,7 +56,9 @@ func simulateTyping(sel interface{}, text string) []chrome.Action {
 	return actions
 }
 
-func Login(ctx context.Context, username, password string) (*AuthInfo, error) {
+func Login(username, password string) (*AuthInfo, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), loginTimeout)
+	defer cancel()
 	opts := chrome.DefaultExecAllocatorOptions[:]
 	if execPath != nil {
 		opts = append(opts, execPath)

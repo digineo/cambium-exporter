@@ -1,7 +1,6 @@
 package exporter
 
 import (
-	"context"
 	"fmt"
 	"log"
 	"net/http"
@@ -26,7 +25,6 @@ type Client struct {
 }
 
 const (
-	loginTimeout                = 5 * time.Minute  // max time for a login attempt
 	sessionRefreshInterval      = 6 * time.Hour    // how often to refresh session cookie
 	sessionRefreshRetries       = 24               // number of retries, if session refresh failed (24*30min = 12h)
 	sessionRefershRetryInterval = 30 * time.Minute // interval between failed sesion refresh attempts
@@ -64,10 +62,8 @@ func LoadClientConfig(file string, verbose bool) (*Client, error) {
 
 func (c *Client) login() error {
 	c.log.Infof("performing login")
-	ctx, cancel := context.WithTimeout(context.Background(), loginTimeout)
-	defer cancel()
 
-	info, err := auth.Login(ctx, c.Username, c.Password)
+	info, err := auth.Login(c.Username, c.Password)
 	if err != nil {
 		c.log.Errorf("login failed: %v", err)
 

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"log"
 	"os"
@@ -31,6 +30,7 @@ func main() {
 	listenAddress := kingpin.Flag("web.listen-address", "Address on which to expose metrics and web interface.").Default(":9836").String()
 	configFile := kingpin.Flag("config", "Path to configuration file.").Default(DefaultConfigPath).String()
 	performLogin := kingpin.Flag("login", "Perform login test, and dump session cookie.").Bool()
+	loginTimeout := kingpin.Flag("login.timeout", "Timeout for login and session refresh.").Default("5m").Short('t').Duration()
 	verbose := kingpin.Flag("verbose", "Increase log verbosity.").Short('V').Bool()
 	versionFlag := kingpin.Flag("version", "Print version information and exit.").Short('v').Bool()
 	kingpin.HelpFlag.Short('h')
@@ -47,6 +47,9 @@ func main() {
 	if binary := os.Getenv("CHROME_BINARY"); binary != "" {
 		auth.SetExecPath(binary)
 	}
+	if *loginTimeout > time.Second {
+		auth.SetLoginTimeout(*loginTimeout)
+	}
 
 	client, err := exporter.LoadClientConfig(*configFile, *verbose)
 	if err != nil {
@@ -54,10 +57,7 @@ func main() {
 	}
 
 	if *performLogin {
-		ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
-		defer cancel()
-
-		info, err := auth.Login(ctx, client.Username, client.Password)
+		info, err := auth.Login(client.Username, client.Password)
 		if err != nil {
 			log.Fatalf("login failed: %v", err)
 
