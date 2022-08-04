@@ -3,8 +3,8 @@ module github.com/digineo/cambium-exporter
 go 1.18
 
 require (
-	github.com/chromedp/cdproto v0.0.0-20220515234810-83d799542a04
-	github.com/chromedp/chromedp v0.8.1
+	github.com/chromedp/cdproto v0.0.0-20220801115359-6a862c1fb810
+	github.com/chromedp/chromedp v0.8.3
 	github.com/julienschmidt/httprouter v1.3.0
 	github.com/pelletier/go-toml v1.9.5
 	github.com/prometheus/client_golang v1.12.2
@@ -25,9 +25,9 @@ require (
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/matttproud/golang_protobuf_extensions v1.0.1 // indirect
 	github.com/prometheus/client_model v0.2.0 // indirect
-	github.com/prometheus/common v0.34.0 // indirect
-	github.com/prometheus/procfs v0.7.3 // indirect
+	github.com/prometheus/common v0.37.0 // indirect
+	github.com/prometheus/procfs v0.8.0 // indirect
 	github.com/stretchr/testify v1.7.0 // indirect
-	golang.org/x/sys v0.0.0-20220517195934-5e4e11fc645e // indirect
-	google.golang.org/protobuf v1.28.0 // indirect
+	golang.org/x/sys v0.0.0-20220803195053-6e608f9ce704 // indirect
+	google.golang.org/protobuf v1.28.1 // indirect
 )
