@@ -24,6 +24,49 @@ sources code, see [`collector.go`](./exporter/collector.go)).
 Head to the [release page](https://github.com/digineo/cambium-exporter/releases)
 for downloads.
 
+There, you'll find packages for Debian/Ubuntu (for systemd), and archives containing
+a pre-built binary for other Linux distributions and Windows.
+
+Please note that you;re going to need a relatively recent version of either Chromium
+or Google Chrome installed on the machine where you want to run the exporter.
+
+On Debian, this can be achieved through an `apt install chromium`.
+
+On Ubuntu, the version installed through `apt install chromium-browser` is actually
+a Snap packege, which does not work properly with the way  Please install a
+"real" package instead.
+
+<details><summary>Why do I need a browser? (click to expand)</summary>
+
+There's currently no officially supported API for cnMaestro cloud instances.
+
+To get the metrics, the exporter can however simply issue HTTP requests to their
+internal API, which is protected by a session cookie and CSRF token.
+
+To get the session cookie and CSRF token, we sadly cannot issue plain HTTP
+requests to their SSO, because they do some of JS crypto shenanigans to mangle
+and obfuscate their login procedure.
+
+We could reverse-engineer that, but that'll always only be a temporary solution.
+A much simpler workaround is to leverage a remote-controlled browser to do the
+login dance. After all, their web UI is made for browsers, isn't it?
+
+The exporter uses Chromium/Google Chrome only to retrieve the session cookie,
+and will shutdown the browser afterwards. Every so often (pre-emptively before
+the cookie expires), the exporter will try to refresh the session cookie and
+login once more, requiring another browser instance.
+
+This all happens automatically, and without the need for user-interaction,
+hence the browser starts without UI ("headless").
+
+If you want to see what the browser does, you try this:
+
+```console
+$ HEADLESS=0 cambium-exporter --login --verbose --config ./config.toml
+```
+
+</details>
+
 ### Docker
 
 Alternatively, you can use Docker:
