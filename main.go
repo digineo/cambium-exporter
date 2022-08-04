@@ -66,7 +66,7 @@ func main() {
 		return
 	}
 
-	log.Fatal(client.Start(*listenAddress, version))
+	log.Fatal(client.Start(*listenAddress, Version()))
 }
 
 func printVersion() {
@@ -77,7 +77,7 @@ func printVersion() {
 
 	const l = "%-10s %-50s %s\n"
 	fmt.Println("Dependencies\n------------")
-	fmt.Printf(l, "main", info.Main.Path, version)
+	fmt.Printf(l, "main", info.Main.Path, Version())
 	for _, i := range info.Deps {
 		if r := i.Replace; r != nil {
 			fmt.Printf(l, "dep", r.Path, r.Version)
@@ -86,4 +86,11 @@ func printVersion() {
 			fmt.Printf(l, "dep", i.Path, i.Version)
 		}
 	}
+}
+
+func Version() string {
+	if commit == "" && date == "" {
+		return version
+	}
+	return fmt.Sprintf("%s (commit %s, built %s)", version, commit, date)
 }
