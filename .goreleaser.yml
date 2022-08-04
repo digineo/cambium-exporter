@@ -8,6 +8,7 @@ builds:
       - -X main.version={{ .Version }}
       - -X main.commit={{ .Commit }}
       - -X main.date={{ .Date }}
+      - -X main.DefaultConfigPath=/etc/cambium-exporter/config.toml
     env:
       - CGO_ENABLED=0
     goos:
@@ -18,8 +19,7 @@ builds:
     mod_timestamp: "{{ .CommitTimestamp }}"
 
 nfpms:
-  - &common_nfpm
-    id:                 cambium-exporter-no-chromium
+  - id:                 cambium-exporter
     package_name:       cambium-exporter
     file_name_template: "{{ .ProjectName }}_{{ .Version }}_NoChromium_{{ .Arch }}"
     vendor:             Digineo GmbH
@@ -53,9 +53,3 @@ nfpms:
       postinstall: debian/postinstall.sh
       preremove:   debian/preremove.sh
       postremove:  debian/postremove.sh
-
-  - <<: *common_nfpm
-    id:                 cambium-exporter-debian
-    file_name_template: "{{ .ProjectName }}_{{ .Version }}_Debian_{{ .Arch }}"
-    dependencies:
-      - chromium # different name on Debian

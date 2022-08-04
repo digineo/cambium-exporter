@@ -8,7 +8,7 @@ RUN set -ex \
       chromium \
  && rm -rf /var/lib/apt/lists/*
 
-COPY dist/cambium-exporter_linux_amd64/cambium-exporter /usr/bin
+COPY dist/cambium-exporter_linux_amd64_v1/cambium-exporter /usr/bin
 
 EXPOSE 9836
 
