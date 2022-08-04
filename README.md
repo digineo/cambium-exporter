@@ -57,7 +57,7 @@ It is **strongly recommended**, that you create a separate user for the
 exporter (with role "Monitor").
 
 If you use the Debian package, just edit `/etc/cambium-exporter/config.toml`
-and restart the exporter by running `systemctl restart `cambium-exporter`.
+and restart the exporter by running `systemctl restart cambium-exporter`.
 Modify the start parameters in `/etc/defaults/cambium-exporter` if you want
 the controller to bind on other addresses than localhost.
 
