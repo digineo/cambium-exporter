@@ -21,7 +21,7 @@ builds:
 nfpms:
   - id:                 cambium-exporter
     package_name:       cambium-exporter
-    file_name_template: "{{ .ProjectName }}_{{ .Version }}_NoChromium_{{ .Arch }}"
+    file_name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Arch }}"
     vendor:             Digineo GmbH
     homepage:           https://www.digineo.de/
     maintainer:         Dominik Menke <dom@digineo.de>
