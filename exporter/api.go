@@ -29,14 +29,12 @@ var bpool = &sync.Pool{
 func (rb *responseBuffer) Close() error {
 	rb.Buffer.Reset()
 	bpool.Put(rb)
-
 	return nil
 }
 
 // newRequest creates a new HTTP request and prefills its header.
 func (c *Client) fetch(ctx context.Context, method, path string, params url.Values) (*http.Response, error) {
-	var u2 url.URL
-	u2 = *c.instance // dup
+	u2 := *c.instance // dup
 	u2.Path = "/0/cn-srv"
 	if len(path) > 0 && path[0] != '/' {
 		u2.Path += "/"
@@ -63,7 +61,7 @@ func (c *Client) fetch(ctx context.Context, method, path string, params url.Valu
 	res, err := c.client.Do(req)
 	if err == nil {
 		buf, _ := bpool.Get().(*responseBuffer)
-		io.Copy(buf, res.Body)
+		_, _ = io.Copy(buf, res.Body)
 		res.Body.Close()
 		res.Body = buf
 
@@ -71,12 +69,11 @@ func (c *Client) fetch(ctx context.Context, method, path string, params url.Valu
 			url,
 			res.StatusCode,
 			buf.Len(),
-			time.Now().Sub(t0),
+			time.Since(t0),
 		)
 	} else {
 		c.log.Infof("error fetching %s: %v", url, err)
 	}
-
 	return res, err
 }
 
@@ -87,8 +84,8 @@ func (c *Client) fetchCSRFToken(ctx context.Context) error {
 	if err != nil {
 		return fmt.Errorf("failed to fetch CSRF token: %w", err)
 	}
-	res.Body.Close()
 
+	res.Body.Close()
 	return nil
 }
 
@@ -125,7 +122,6 @@ func (c *Client) fetchAPGroups(ctx context.Context) ([]string, error) {
 	for _, p := range data.Data.Profiles {
 		groups = append(groups, p.Name)
 	}
-
 	return groups, nil
 }
 
@@ -170,7 +166,6 @@ func (c *Client) fetchDevices(ctx context.Context, apGroup string) ([]*Device, e
 	for _, dev := range data.Data.Profiles.Devices {
 		devs = append(devs, dev.Normalize())
 	}
-
 	return devs, nil
 }
 
@@ -195,7 +190,6 @@ func (c *Client) fetchAPGroupData(ctx context.Context, apGroup string) (*APGroup
 	}
 
 	apg := data.Data.Profiles[0]
-
 	return &apg, nil
 }
 
@@ -225,7 +219,6 @@ func (c *Client) fetchGuestPortals(ctx context.Context) ([]string, error) {
 	for _, portal := range data.Data.Portals {
 		names = append(names, portal.Name)
 	}
-
 	return names, nil
 }
 
@@ -240,11 +233,9 @@ func (c *Client) fetchPortalSessions(ctx context.Context, name string) ([]*Porta
 		if err != nil {
 			return nil, 0, fmt.Errorf("failed to decode portal session data for portal %s (page %d): %w", name, page, err)
 		}
-
 		for _, s := range data.Sessions {
 			count[s.DeviceMAC]++
 		}
-
 		if total = data.Meta.Total; total < sessionsPerPage*(page+1) {
 			break // no more results on the next page
 		}
@@ -258,7 +249,6 @@ func (c *Client) fetchPortalSessions(ctx context.Context, name string) ([]*Porta
 			PortalName: name,
 		})
 	}
-
 	return sessions, total, nil
 }
 
@@ -275,7 +265,7 @@ func (c *Client) fetchPortalSessionsPage(ctx context.Context, name string, page 
 	var data struct {
 		Data SessionsAPIResponse `json:"data"`
 	}
-	err = json.NewDecoder(res.Body).Decode(&data)
 
+	err = json.NewDecoder(res.Body).Decode(&data)
 	return &data.Data, err
 }

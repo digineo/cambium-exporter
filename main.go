@@ -60,11 +60,9 @@ func main() {
 		info, err := auth.Login(client.Username, client.Password)
 		if err != nil {
 			log.Fatalf("login failed: %v", err)
-
 			return
 		}
 		log.Printf("login succeeded: %+v", info)
-
 		return
 	}
 

@@ -82,7 +82,6 @@ func (radio radioResponse) Normalize() (r Radio) {
 	if chw, err := strconv.Atoi(radio.ChannelWidth); err == nil {
 		r.ChannelWidth = chw
 	}
-
 	return
 }
 

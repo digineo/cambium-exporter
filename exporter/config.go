@@ -20,7 +20,6 @@ type Client struct {
 
 	instance *url.URL
 	client   *http.Client
-	authInfo *auth.AuthInfo
 	log      logger
 }
 
@@ -56,7 +55,6 @@ func LoadClientConfig(file string, verbose bool) (*Client, error) {
 
 	c.instance = uri
 	c.client = &http.Client{Jar: jar}
-
 	return &c, nil
 }
 
@@ -66,7 +64,6 @@ func (c *Client) login() error {
 	info, err := auth.Login(c.Username, c.Password)
 	if err != nil {
 		c.log.Errorf("login failed: %v", err)
-
 		return err
 	}
 
@@ -85,7 +82,6 @@ func (c *Client) login() error {
 	}
 
 	c.client.Jar.SetCookies(c.instance, []*http.Cookie{sidCookie, xsrfCookie})
-
 	return nil
 }
 
@@ -95,7 +91,6 @@ func (c *Client) getCsrfToken() string {
 			return cookie.Value
 		}
 	}
-
 	return ""
 }
 

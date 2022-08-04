@@ -96,7 +96,6 @@ func Login(username, password string) (*AuthInfo, error) {
 	if err := chrome.Run(taskCtx, actions...); err != nil {
 		return nil, fmt.Errorf("failed to login: %w", err)
 	}
-
 	return &info, nil
 }
 
@@ -115,7 +114,6 @@ func extractCookies(info *AuthInfo) chrome.Action {
 				info.XSRFToken = cookie.Value
 			}
 		}
-
 		return nil
 	})
 }

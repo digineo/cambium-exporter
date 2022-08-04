@@ -18,7 +18,6 @@ func (c *Client) Start(listenAddress, version string) error {
 	if err := c.login(); err != nil {
 		return err
 	}
-
 	go c.startSessionRefresh()
 
 	router := httprouter.New()
@@ -60,7 +59,6 @@ func (c *Client) Start(listenAddress, version string) error {
 	}
 
 	c.log.Infof("Starting exporter on %s", where)
-
 	return http.ListenAndServe(listenAddress, router)
 }
 
@@ -69,12 +67,11 @@ func (c *Client) listAPGroups(w http.ResponseWriter, r *http.Request, _ httprout
 	result, err := c.fetchAPGroups(r.Context())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadGateway)
-
 		return
 	}
 
 	w.Header().Add("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(&result)
+	_ = json.NewEncoder(w).Encode(&result)
 }
 
 func (c *Client) apGroupMetricsHandler(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
@@ -97,19 +94,17 @@ func (c *Client) apGroupDebugHandler(w http.ResponseWriter, r *http.Request, par
 	devices, err := c.fetchDevices(r.Context(), apg)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadGateway)
-
 		return
 	}
 
 	basic, err := c.fetchAPGroupData(r.Context(), apg)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadGateway)
-
 		return
 	}
 
 	w.Header().Add("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]interface{}{
+	_ = json.NewEncoder(w).Encode(map[string]interface{}{
 		"apgroup": basic,
 		"devices": devices,
 	})
@@ -120,12 +115,11 @@ func (c *Client) listPortals(w http.ResponseWriter, r *http.Request, _ httproute
 	result, err := c.fetchGuestPortals(r.Context())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadGateway)
-
 		return
 	}
 
 	w.Header().Add("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(&result)
+	_ = json.NewEncoder(w).Encode(&result)
 }
 
 func (c *Client) portalMetricsHandler(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
@@ -148,12 +142,11 @@ func (c *Client) portalDebugHandler(w http.ResponseWriter, r *http.Request, para
 	sessions, total, err := c.fetchPortalSessions(r.Context(), name)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadGateway)
-
 		return
 	}
 
 	w.Header().Add("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]interface{}{
+	_ = json.NewEncoder(w).Encode(map[string]interface{}{
 		"total":    total,
 		"sessions": sessions,
 	})

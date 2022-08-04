@@ -94,7 +94,6 @@ func (c *Collector) Collect(ch chan<- prometheus.Metric) {
 	if err != nil {
 		c.client.log.Errorf("fetching AP group data for %s failed with %v", c.apGroup, err)
 		metric(ctrlUp, 0)
-
 		return
 	}
 
@@ -102,7 +101,6 @@ func (c *Collector) Collect(ch chan<- prometheus.Metric) {
 	if err != nil {
 		c.client.log.Errorf("fetching device data for %s failed with %v", c.apGroup, err)
 		metric(ctrlUp, 0)
-
 		return
 	}
 
@@ -154,7 +152,6 @@ func (c *PortalCollector) Collect(ch chan<- prometheus.Metric) {
 	if err != nil {
 		c.client.log.Errorf("fetching portal data for %s failed with %v", c.portal, err)
 		metric(ctrlUp, 0)
-
 		return
 	}
 
@@ -168,18 +165,15 @@ func (c *PortalCollector) Collect(ch chan<- prometheus.Metric) {
 
 func groupDesc(name, help string, extraLabel ...string) *prometheus.Desc {
 	fqdn := prometheus.BuildFQName(namespace, "ap_group", name)
-
 	return prometheus.NewDesc(fqdn, help, groupLabels, nil)
 }
 
 func apDesc(name, help string, extraLabel ...string) *prometheus.Desc {
 	fqdn := prometheus.BuildFQName(namespace, "ap", name)
-
 	return prometheus.NewDesc(fqdn, help, append(apLabels, extraLabel...), nil)
 }
 
 func radioDesc(name, help string, extraLabel ...string) *prometheus.Desc {
 	fqdn := prometheus.BuildFQName(namespace, "ap_radio", name)
-
 	return prometheus.NewDesc(fqdn, help, append(radioLabels, extraLabel...), nil)
 }
