@@ -33,8 +33,8 @@ or Google Chrome installed on the machine where you want to run the exporter.
 On Debian, this can be achieved through an `apt install chromium`.
 
 On Ubuntu, the version installed through `apt install chromium-browser` is actually
-a Snap packege, which does not work properly with the way  Please install a
-"real" package instead.
+a Snap packege, which does not work properly with the way the exporter wants to
+interact with the browser. Please install a "real" package instead.
 
 <details><summary>Why do I need a browser? (click to expand)</summary>
 
