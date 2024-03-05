@@ -10,7 +10,7 @@ import (
 	"github.com/digineo/cambium-exporter/auth"
 	"github.com/digineo/cambium-exporter/exporter"
 
-	kingpin "gopkg.in/alecthomas/kingpin.v2"
+	kingpin "github.com/alecthomas/kingpin/v2"
 )
 
 // DefaultConfigPath points to the default config file location.

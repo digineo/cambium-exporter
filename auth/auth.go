@@ -7,7 +7,7 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/chromedp/cdproto/network"
+	"github.com/chromedp/cdproto/storage"
 	chrome "github.com/chromedp/chromedp"
 )
 
@@ -137,7 +137,7 @@ func Login(username, password string, verbose bool) (*AuthInfo, error) {
 
 func extractCookies(info *AuthInfo) chrome.Action {
 	return chrome.ActionFunc(func(ctx context.Context) error {
-		cookies, err := network.GetAllCookies().Do(ctx)
+		cookies, err := storage.GetCookies().Do(ctx)
 		if err != nil {
 			return err
 		}
