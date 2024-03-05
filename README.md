@@ -72,7 +72,7 @@ $ HEADLESS=0 cambium-exporter --login --verbose --config ./config.toml
 Alternatively, you can use Docker:
 
 ```console
-$ docker run -v /path/to/config.toml:config.toml:ro -p 9836:9836 digineode/cambium-exporter
+$ docker run -v /path/to/config.toml:/config.toml:ro -p 9836:9836 ghcr.io/digineo/cambium-exporter
 ```
 
 ### Build it yourself

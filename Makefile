@@ -1,4 +1,4 @@
-DOCKER_TAG = digineode/cambium-exporter:latest
+DOCKER_TAG = ghcr.io/digineo/cambium-exporter:latest
 
 RELEASE ?= 0
 
