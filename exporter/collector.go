@@ -163,7 +163,7 @@ func (c *PortalCollector) Collect(ch chan<- prometheus.Metric) {
 	}
 }
 
-func groupDesc(name, help string, extraLabel ...string) *prometheus.Desc {
+func groupDesc(name, help string) *prometheus.Desc {
 	fqdn := prometheus.BuildFQName(namespace, "ap_group", name)
 	return prometheus.NewDesc(fqdn, help, groupLabels, nil)
 }

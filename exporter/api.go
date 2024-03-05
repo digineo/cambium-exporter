@@ -43,7 +43,7 @@ func (c *Client) fetch(ctx context.Context, method, path string, params url.Valu
 	u2.RawQuery = params.Encode()
 	url := u2.String()
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+	req, err := http.NewRequestWithContext(ctx, method, url, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to construct HTTP request: %w", err)
 	}
