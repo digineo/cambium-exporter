@@ -6,6 +6,8 @@
   - `cambium-exporter_*_amd64.deb` (requires systemd)
 - Other Linux variant:
   - `cambium-exporter_*_linux_amd64.tar.gz`
+- Docker:
+  - `ghcr.io/digineo/cambium-exporter`
 
 Notes:
 
