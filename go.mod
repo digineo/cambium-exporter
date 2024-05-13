@@ -8,7 +8,7 @@ require (
 	github.com/chromedp/chromedp v0.9.5
 	github.com/julienschmidt/httprouter v1.3.0
 	github.com/pelletier/go-toml v1.9.5
-	github.com/prometheus/client_golang v1.19.0
+	github.com/prometheus/client_golang v1.19.1
 )
 
 require (
@@ -26,5 +26,5 @@ require (
 	github.com/prometheus/procfs v0.12.0 // indirect
 	github.com/xhit/go-str2duration/v2 v2.1.0 // indirect
 	golang.org/x/sys v0.18.0 // indirect
-	google.golang.org/protobuf v1.32.0 // indirect
+	google.golang.org/protobuf v1.33.0 // indirect
 )
