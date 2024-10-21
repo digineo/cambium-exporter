@@ -4,8 +4,8 @@ go 1.22
 
 require (
 	github.com/alecthomas/kingpin/v2 v2.4.0
-	github.com/chromedp/cdproto v0.0.0-20240801214329-3f85d328b335
-	github.com/chromedp/chromedp v0.10.0
+	github.com/chromedp/cdproto v0.0.0-20241003230502-a4a8f7c660df
+	github.com/chromedp/chromedp v0.11.0
 	github.com/julienschmidt/httprouter v1.3.0
 	github.com/pelletier/go-toml v1.9.5
 	github.com/prometheus/client_golang v1.20.4
@@ -27,6 +27,6 @@ require (
 	github.com/prometheus/common v0.55.0 // indirect
 	github.com/prometheus/procfs v0.15.1 // indirect
 	github.com/xhit/go-str2duration/v2 v2.1.0 // indirect
-	golang.org/x/sys v0.22.0 // indirect
+	golang.org/x/sys v0.26.0 // indirect
 	google.golang.org/protobuf v1.34.2 // indirect
 )
