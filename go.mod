@@ -6,7 +6,7 @@ toolchain go1.23.2
 require (
 	github.com/alecthomas/kingpin/v2 v2.4.0
 	github.com/chromedp/cdproto v0.0.0-20241022234722-4d5d5faf59fb
-	github.com/chromedp/chromedp v0.11.1
+	github.com/chromedp/chromedp v0.11.2
 	github.com/julienschmidt/httprouter v1.3.0
 	github.com/pelletier/go-toml v1.9.5
 	github.com/prometheus/client_golang v1.20.5
