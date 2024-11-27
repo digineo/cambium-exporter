@@ -109,9 +109,9 @@ func Login(username, password string, verbose bool) (*AuthInfo, error) {
 		withLog("navigate to cloud.cambiumnetworks.com",
 			chrome.Navigate("https://cloud.cambiumnetworks.com/")),
 		withLog("waiting for page to load",
-			chrome.WaitVisible(`a[href="/cn-rtr/sso"]`)),
+			chrome.WaitVisible(`form.signin`)),
 		withLog("navigate to SSO login",
-			chrome.Click(`a[href="/cn-rtr/sso"]`, chrome.NodeVisible)),
+			chrome.Click(`form.signin a.btn-primary`, chrome.NodeVisible)),
 		withLog("waiting for page to load",
 			chrome.WaitVisible(`input[name="email"`)),
 	}
