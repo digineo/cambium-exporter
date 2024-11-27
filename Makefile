@@ -9,10 +9,10 @@ dev: config.toml
 .PHONY: release
 release:
 ifeq ($(RELEASE),0)
-	goreleaser release --rm-dist --skip-publish --snapshot
+	goreleaser release --clean --skip=publish --snapshot
 	docker build --tag $(DOCKER_TAG) --pull .
 else
-	goreleaser release --rm-dist --skip-sign --release-footer debian/release-footer.md
+	goreleaser release --clean --skip=sign --release-footer debian/release-footer.md
 	docker build --tag $(DOCKER_TAG) --pull .
 	docker push $(DOCKER_TAG)
 endif
