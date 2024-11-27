@@ -43,6 +43,11 @@ func wait(dur time.Duration) chrome.ActionFunc {
 	})
 }
 
+const (
+	typingDelay  = 25 * time.Millisecond
+	typingJitter = 30 // also ms
+)
+
 func simulateTyping(sel interface{}, text string, verbose bool, actionName string) []chrome.Action {
 	actions := make([]chrome.Action, 0, 2*len(text)+1)
 	if verbose {
@@ -54,10 +59,8 @@ func simulateTyping(sel interface{}, text string, verbose bool, actionName strin
 	}
 
 	for _, r := range text {
-		actions = append(actions,
-			chrome.SendKeys(sel, string(r)),
-			wait(time.Duration(25+rand.Intn(30))*time.Millisecond),
-		)
+		jitter := time.Duration(rand.Intn(typingJitter)) * time.Millisecond
+		actions = append(actions, chrome.SendKeys(sel, string(r)), wait(typingDelay+jitter))
 	}
 
 	return actions
@@ -75,6 +78,8 @@ func (a *actionLogger) Do(ctx context.Context) error {
 	}
 	return a.Action.Do(ctx)
 }
+
+const loginAnimationTimeout = 5 * time.Second
 
 func Login(username, password string, verbose bool) (*AuthInfo, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), loginTimeout)
@@ -124,7 +129,7 @@ func Login(username, password string, verbose bool) (*AuthInfo, error) {
 		withLog("logging in",
 			chrome.Click(`button[name="submit"]`)),
 		withLog("waiting for page to finish animation",
-			wait(5*time.Second)),
+			wait(loginAnimationTimeout)),
 		withLog("extracting session cookie",
 			extractCookies(&info)),
 	)

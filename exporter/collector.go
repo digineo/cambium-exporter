@@ -74,6 +74,8 @@ func (*Collector) Describe(ch chan<- *prometheus.Desc) {
 	ch <- radioXfer
 }
 
+const kbps = 1000
+
 func (c *Collector) Collect(ch chan<- prometheus.Metric) {
 	c.client.log.Debugf("collecting metrics for %s", c.apGroup)
 
@@ -129,8 +131,8 @@ func (c *Collector) Collect(ch chan<- prometheus.Metric) {
 			intMetric(radioQuality, r.Quality, name, mac, band)
 
 			// controller reports kBit/s, we export Bit/s
-			intMetric(radioXfer, r.Tx*1000, name, mac, band, "out")
-			intMetric(radioXfer, r.Rx*1000, name, mac, band, "in")
+			intMetric(radioXfer, r.Tx*kbps, name, mac, band, "out")
+			intMetric(radioXfer, r.Rx*kbps, name, mac, band, "in")
 		}
 	}
 }
