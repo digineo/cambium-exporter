@@ -10,7 +10,7 @@ require (
 	github.com/chromedp/chromedp v0.13.0
 	github.com/julienschmidt/httprouter v1.3.0
 	github.com/pelletier/go-toml v1.9.5
-	github.com/prometheus/client_golang v1.21.0
+	github.com/prometheus/client_golang v1.21.1
 )
 
 require (
